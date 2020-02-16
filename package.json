@@ -1,0 +1,52 @@
+{
+	"name": "serverless-realtime-image-resizer",
+	"version": "1.0.0",
+	"description": "A realtime image resizer which fetch image from S3 bucket and resize the image according to the path parameter",
+	"main": "index.js",
+	"scripts": {
+		"logs": "serverless logs -s=production -t -f",
+		"dev": "NODE_ENV=development nodemon --exec \"serverless offline start\" -e \"extensions,to,watch,for,example,js,elm,hs,py\"  ",
+		"invoke": "serverless invoke --function",
+		"invoke:local": "serverless invoke local --function",
+		"deploy": "serverless deploy --stage=production",
+		"lint": "eslint . --ext .js",
+		"lint:fix": "eslint . --ext .js --fix"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/kenyipp/serverless-realtime-image-resizer.git"
+	},
+	"keywords": [
+		"serverless",
+		"sls",
+		"sharp",
+		"lambda"
+	],
+	"author": "ken.yip",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/kenyipp/serverless-realtime-image-resizer/issues"
+	},
+	"homepage": "https://github.com/kenyipp/serverless-realtime-image-resizer#readme",
+	"devDependencies": {
+		"eslint": "^6.8.0",
+		"eslint-config-airbnb-base": "^14.0.0",
+		"eslint-plugin-import": "^2.20.1",
+		"lodash-webpack-plugin": "^0.11.5",
+		"serverless-apigw-binary": "^0.4.4",
+		"serverless-offline": "^5.12.1",
+		"serverless-plugin-existing-s3": "^2.4.0",
+		"serverless-pseudo-parameters": "^2.5.0",
+		"serverless-s3-local": "^0.5.4",
+		"serverless-webpack": "^5.3.1",
+		"sharp": "^0.24.1",
+		"webpack": "^4.41.6",
+		"webpack-node-externals": "^1.7.2"
+	},
+	"dependencies": {
+		"aws-sdk": "^2.619.0",
+		"crypto": "^1.0.1",
+		"joi": "^14.3.1",
+		"lambda-warmer": "^1.2.1"
+	}
+}

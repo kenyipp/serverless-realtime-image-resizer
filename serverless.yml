@@ -1,0 +1,77 @@
+service: sls-realtime-image-resize
+
+plugins:
+  # - serverless-webpack
+  - serverless-pseudo-parameters
+  - serverless-s3-local
+  - serverless-offline
+  - serverless-apigw-binary
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  region: ap-southeast-1
+  stage: ${opt:stage, "development"}
+  profile: default
+  memorySize: 256
+  environment:
+    NODE_PATH: "./:/opt/node_modules"
+    S3_BUCKET: ${self:custom.s3Bucket}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:GetObject"
+        - "s3:DeleteObject"
+      Resource: "*"
+
+custom:
+  apigwBinary:
+    types:
+      - "*/*"
+  s3:
+    host: 0.0.0.0
+    port: 8000
+    directory: /tmp
+  s3Bucket: serverless-s3-image-source-20200216-4
+
+functions:
+  imageCheck:
+    handler: app/checker.handler
+    description: Validate the image is valid or not. Delete it if it is not a valid image.
+    events:
+      - s3: 
+          bucket: ${self:custom.s3Bucket}
+          event: s3:ObjectCreated:*
+          existing: true #https://github.com/serverless/serverless/issues/4284
+    layers:
+      - arn:aws:lambda:${self:provider.region}:#{AWS::AccountId}:layer:sharp:3
+      - arn:aws:lambda:${self:provider.region}:#{AWS::AccountId}:layer:utils:3
+
+  imageResize:
+    handler: app/resize.handler
+    description: A realtime image resizer which scrape file from s3 bucket and response with the resized image.
+    events:
+      - http:
+          method: GET
+          path: /{size}/{filename}
+          cors: true
+          contentHandling: CONVERT_TO_BINARY
+      - schedule:
+          rate: rate(5 minutes)
+          enabled: true
+          input:
+            warmer: true
+            concurrency: 1
+    layers:
+      - arn:aws:lambda:${self:provider.region}:#{AWS::AccountId}:layer:sharp:3
+      - arn:aws:lambda:${self:provider.region}:#{AWS::AccountId}:layer:utils:3
+
+package:
+  individually: false #since functions are share with the same dependencies
+
+resources:
+  Resources:
+    ServerlessImageSource:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.s3Bucket}
